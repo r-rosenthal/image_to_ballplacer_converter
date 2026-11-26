@@ -6,7 +6,7 @@ import os
 from PIL import Image
 
 pitch_um = 180
-max_num_balls_1_dim = 140
+max_num_balls_1_dim = 120
 length_long_edge_mm = max_num_balls_1_dim * pitch_um / 1000
 
 # origin of the ball placing pattern in mm in the absolute coordinate system of the ball placer machine
@@ -31,14 +31,14 @@ image = image.resize(
 	(max(1, round(image.width * scale)), max(1, round(image.height * scale))),
 	Image.Resampling.LANCZOS,
 )
-image.save(os.path.join(script_folder, "image_scaled.png"), format="PNG")
+image.save(os.path.join(script_folder, f"image_scaled_to_{max_num_balls_1_dim}.png"), format="PNG")
 
 # convert the image to pure black and white
 image = image.convert("RGB")
 image.putdata(
-	[(255, 255, 255) if all(channel >= 240 for channel in pixel) else (0, 0, 0) for pixel in image.get_flattened_data()]
+    [(255, 255, 255) if all(channel >= 180 for channel in pixel) else (0, 0, 0) for pixel in image.get_flattened_data()]
 )
-image.save(os.path.join(script_folder, "bw_image_scaled.png"), format="PNG")
+image.save(os.path.join(script_folder, f"bw_image_scaled_to_{max_num_balls_1_dim}.png"), format="PNG")
 
 # print the image to the console as a grid of * and spaces
 pixels = list(image.get_flattened_data())
@@ -53,7 +53,7 @@ print(f"Length of long edge: {length_long_edge_mm:.2f}mm")
 # go through the pixels from bottom left up every column and print the coordinates of the black pixels in mm in the absolute coordinate system of the ball placer machine
 ball_number = 1
 print("Coordinates of solder balls in mm:")
-coordinates_path = os.path.join(script_folder, f"ball_coordinates_width_{length_long_edge_mm}_mm_{num_balls}_balls.txt")
+coordinates_path = os.path.join(script_folder, f"ball_coordinates_width_{length_long_edge_mm}_mm_{max_num_balls_1_dim}_balls_{num_balls}_total_balls.txt")
 with open(coordinates_path, "w", encoding="utf-8") as coordinates_file:
     for x in range(image.width):
         for y in range(image.height):
